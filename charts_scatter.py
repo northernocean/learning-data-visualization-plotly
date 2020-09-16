@@ -18,11 +18,13 @@ data = [
             symbol="pentagon",
             line={"width": 1})
     )]
+
 layout = go.Layout(
     title="Sine Curve",
     xaxis=dict(title="x-values"),
     yaxis=dict(title="yaxis"),
     hovermode="closest")
+
 fig = go.Figure(data=data, layout=layout)
 
 pyo.plot(fig)  # or just fig.show()

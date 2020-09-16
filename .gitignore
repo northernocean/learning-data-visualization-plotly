@@ -2,6 +2,7 @@
 .vscode/
 data.sqlite
 temp-plot.html
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
