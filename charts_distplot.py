@@ -2,7 +2,7 @@ import plotly.figure_factory as ff
 import numpy as np
 
 hist_data = [
-    (np.random.randn(200) - 2), 
+    (np.random.randn(200) - 2),
     (np.random.randn(200)),
     (np.random.randn(200) + 2)
 ]
