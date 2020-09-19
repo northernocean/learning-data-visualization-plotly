@@ -8,25 +8,46 @@ app = dash.Dash()
 
 app.layout = html.Div(
     [
-        "this is the outermost div",
         html.Div(
-            "this is an inner div",
-            style={
-                "color": "red"
-            }
+            [
+                html.Label("Dropdown"),
+                core.Dropdown(
+                    options=[
+                        {"label": "New York City", "value": "NYC"},
+                        {"label": "San Francisco", "value": "SF"}
+                    ],
+                    value="SF"
+                )
+            ],
+            style={"margin": "40px"}
         ),
         html.Div(
-            "another inner div",
-            style={
-                "color": "blue",
-                "border": "3px solid blue"
-            }
+            [
+                html.Label("Slider"),
+                core.Slider(
+                    min=-10,
+                    max=10,
+                    step=1,
+                    value=0,
+                    marks={i: i for i in range(-10, 10)}
+                )
+            ],
+            style={"margin": "40px"}
+        ),
+        html.Div(
+            [
+                html.Label("Radio"),
+                core.RadioItems(
+                    options=[
+                        {"label": "New York City", "value": "NYC"},
+                        {"label": "San Francisco", "value": "SF"},
+                    ],
+                    value="SF"
+                )
+            ],
+            style={"margin": "40px"}
         )
-    ],
-    style={
-        "color": "green",
-        "border": "6px solid green"
-    }
+    ]
 )
 
 if __name__ == "__main__":
