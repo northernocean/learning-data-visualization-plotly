@@ -1,26 +1,31 @@
 import dash
 import dash_core_components as core
 import dash_html_components as html
+from dash.dependencies import Input, Output
 
 app = dash.Dash()
 
-markdown_text = '''
-### Dash and Markdown
+app.layout = html.Div(
+    [
+        core.Input(
+            id="4f20",
+            value="type some text here",
+            type="text"
+        ),
+        html.Div(
+            id="51e3"
+        )
 
-Dash apps can be written in Markdown.
-Dash uses the [CommonMark](http://commonmark.org/) specification of Markdown.
+    ]
+)
 
-Check out their [60 Second Markdown Tutorial](http://commonmark.org/help/)
-if this is your first introduction to Markdown!
 
-Markdown includes syntax for things like **bold text** and *italics*,
-[links](http://commonmark.org/help), inline `code` snippets, lists,
-quotes, and more.
-'''
+@app.callback(
+    Output(component_id="51e3", component_property="children"),
+    [Input(component_id="4f20", component_property="value")])
+def update_output_div(input_value):
+    return input_value
 
-app.layout = html.Div([
-    core.Markdown(children=markdown_text)
-])
 
 if __name__ == '__main__':
     app.run_server()
