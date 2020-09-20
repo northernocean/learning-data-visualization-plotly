@@ -61,16 +61,16 @@ app.layout = html.Div(
                     id='hover-data'
                 )
             ]
-        ),
-        html.Div(
-            [
-                html.Img(
-                    id='hover-image',
-                    src='children',
-                    height=300
-                )
-            ]
         )
+        # ,html.Div(
+        #     [
+        #         html.Img(
+        #             id='hover-image',
+        #             src='children',
+        #             height=300
+        #         )
+        #     ]
+        # )
     ]
 )
 
@@ -78,23 +78,23 @@ app.layout = html.Div(
 # output hover data on page
 @app.callback(
     Output('hover-data', 'children'),
-    [Input('wheels-plot', 'clickData')]
+    [Input('wheels-plot', 'selectedData')]
 )
-def callback_json(clickData):
-    return json.dumps(clickData, indent=2)
+def callback_json(selectedData):
+    return json.dumps(selectedData, indent=2)
 
 
 # output image on page
-@app.callback(
-    Output('hover-image', 'src'),
-    [Input('wheels-plot', 'clickData')]
-)
-def callback_image(clickData):
-    wheel = clickData['points'][0]['y']
-    color = clickData['points'][0]['x']
-    path = df[(df["wheels"] == wheel) & (df["color"] == color)].iloc[0]["image"]
-    path = os.path.join("data", "images", path)
-    return encode_image(path)
+# @app.callback(
+#     Output('hover-image', 'src'),
+#     [Input('wheels-plot', 'selectedData')]
+# )
+# def callback_image(selectedData):
+#     wheel = selectedData['points'][0]['y']
+#     color = selectedData['points'][0]['x']
+#     path = df[(df["wheels"] == wheel) & (df["color"] == color)].iloc[0]["image"]
+#     path = os.path.join("data", "images", path)
+#     return encode_image(path)
 
 
 if __name__ == '__main__':
