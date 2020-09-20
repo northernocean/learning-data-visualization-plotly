@@ -1,0 +1,9 @@
+body {
+    width: 50%;
+}
+div.dash-app {
+    margin: 5;
+    border: solid 1px grey;
+    padding: 5px;
+    margin-bottom: 5px;
+}

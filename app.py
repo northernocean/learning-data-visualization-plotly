@@ -1,94 +1,94 @@
+import os
+import base64
 import dash
 import dash_core_components as core
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.graph_objs as go
 import pandas as pd
+
+df = pd.read_csv("data/wheels.csv")
+print(df)
 
 app = dash.Dash()
 
-df = pd.read_csv('data/mpg.csv')
-print(df)
 
-features = df.columns
+def encode_image(file_path):
+    encoded = base64.b64encode(open(file_path, "rb").read())
+    return f"data:image/png;base64,{encoded.decode()}"
 
-# ------------------------------------------
-# Two Dropdowns and Graph
-# First Dropdown: Select x value to graph
-# Second Dropdown : Select y value to graph
-# The values for the dropdowns will be keyed
-#   to the feature names of the dataset
-# ------------------------------------------
+
 app.layout = html.Div(
     [
+        # Radio Button
         html.Div(
-            [
-                core.Graph(id='feature-graphic')
-            ],
-            style={'margin-top': '40px'}
-        ),
-        html.Div(
-            [
-                core.Dropdown(
-                    id='xaxis',
-                    options=[{'label': i.title(), 'value': i} for i in features],
-                    value='displacement'
+            className="dash-app",
+            children=[
+                core.RadioItems(
+                    id="wheels",
+                    options=[
+                        {"label": i, "value": i} for i in df["wheels"].unique()
+                    ],
+                    value=1
                 )
-            ],
-            style={'width': '48%', 'margin-bottom': '10px', 'margin-top': '40px'}
+            ]
         ),
+        # output for number of wheels
         html.Div(
-            [
-                core.Dropdown(
-                    id='yaxis',
-                    options=[{'label': i.title(), 'value': i} for i in features],
-                    value='acceleration'
+            className="dash-app",
+            id="wheels-output",
+        ),
+        # Color Dropdown
+        html.Div(
+            className="dash-app",
+            children=[
+                core.RadioItems(
+                    id="colors",
+                    options=[
+                        {"label": i, "value": i} for i in df["color"].unique()
+                    ],
+                    value="blue"
                 )
-            ],
-            style={'width': '48%', 'margin': '40 0'}
+
+            ]
+        ),
+        # output for number of colors
+        html.Div(
+            className="dash-app",
+            id="colors-output",
+        ),
+        html.Img(
+            className="dash-app",
+            id="display-image",
+            src="children",
+            height=300
+
         )
-    ], style={'padding': 10}
+    ]
 )
 
 
 @app.callback(
-    Output('feature-graphic', 'figure'),
-    [
-        Input('xaxis', 'value'),
-        Input('yaxis', 'value')
-    ]
+    Output("wheels-output", "children"),
+    [Input("wheels", "value")])
+def callback_wheels(wheels_value):
+    return wheels_value
+
+
+@app.callback(
+    Output("colors-output", "children"),
+    [Input("colors", "value")])
+def callback_colors(colors_value):
+    return colors_value
+
+
+@app.callback(
+    Output("display-image", "src"),
+    [Input("wheels", "value"), Input("colors", "value")]
 )
-def update_graph(xaxis_name, yaxis_name):
-    return {
-        'data': [go.Scatter(
-            x=df[xaxis_name],
-            y=df[yaxis_name],
-            text=df['name'],
-            mode='markers',
-            marker={
-                'size': 15,
-                'opacity': 0.5,
-                'line': {
-                    'width': 0.5,
-                    'color': 'white'}
-            }
-        )],
-        'layout': go.Layout(
-            xaxis={
-                'title': xaxis_name.title()
-            },
-            yaxis={
-                'title': yaxis_name.title()
-            },
-            margin={
-                'l': 40,
-                'b': 40,
-                't': 10,
-                'r': 0
-            },
-            hovermode='closest'
-        )
-    }
+def callback_image(wheel, color):
+    path = df[(df["wheels"] == wheel) & (df["color"] == color)].iloc[0]["image"]
+    path = os.path.join("data", "images", path)
+    return encode_image(path)
 
 
 if __name__ == '__main__':
