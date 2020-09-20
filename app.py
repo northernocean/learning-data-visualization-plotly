@@ -78,20 +78,20 @@ app.layout = html.Div(
 # output hover data on page
 @app.callback(
     Output('hover-data', 'children'),
-    [Input('wheels-plot', 'hoverData')]
+    [Input('wheels-plot', 'clickData')]
 )
-def callback_json(hoverData):
-    return json.dumps(hoverData, indent=2)
+def callback_json(clickData):
+    return json.dumps(clickData, indent=2)
 
 
 # output image on page
 @app.callback(
     Output('hover-image', 'src'),
-    [Input('wheels-plot', 'hoverData')]
+    [Input('wheels-plot', 'clickData')]
 )
-def callback_image(hoverData):
-    wheel = hoverData['points'][0]['y']
-    color = hoverData['points'][0]['x']
+def callback_image(clickData):
+    wheel = clickData['points'][0]['y']
+    color = clickData['points'][0]['x']
     path = df[(df["wheels"] == wheel) & (df["color"] == color)].iloc[0]["image"]
     path = os.path.join("data", "images", path)
     return encode_image(path)
