@@ -5,52 +5,86 @@ from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 import pandas as pd
 
-df = pd.read_csv('data/gapminderDataFiveYear.csv')
-print(df)
-
 app = dash.Dash()
 
-year_options = []
-for year in df['year'].unique():
-    year_options.append({'label': str(year), 'value': year})
+df = pd.read_csv('data/mpg.csv')
+print(df)
 
-app.layout = html.Div([
-    core.Graph(id='graph'),
-    core.Dropdown(
-        id='year-picker',
-        options=year_options,
-        value=df['year'].min()
-    )
-])
+features = df.columns
+
+# ------------------------------------------
+# Two Dropdowns and Graph
+# First Dropdown: Select x value to graph
+# Second Dropdown : Select y value to graph
+# The values for the dropdowns will be keyed
+#   to the feature names of the dataset
+# ------------------------------------------
+app.layout = html.Div(
+    [
+        html.Div(
+            [
+                core.Graph(id='feature-graphic')
+            ],
+            style={'margin-top': '40px'}
+        ),
+        html.Div(
+            [
+                core.Dropdown(
+                    id='xaxis',
+                    options=[{'label': i.title(), 'value': i} for i in features],
+                    value='displacement'
+                )
+            ],
+            style={'width': '48%', 'margin-bottom': '10px', 'margin-top': '40px'}
+        ),
+        html.Div(
+            [
+                core.Dropdown(
+                    id='yaxis',
+                    options=[{'label': i.title(), 'value': i} for i in features],
+                    value='acceleration'
+                )
+            ],
+            style={'width': '48%', 'margin': '40 0'}
+        )
+    ], style={'padding': 10}
+)
 
 
 @app.callback(
-    Output('graph', 'figure'),
-    [Input('year-picker', 'value')]
+    Output('feature-graphic', 'figure'),
+    [
+        Input('xaxis', 'value'),
+        Input('yaxis', 'value')
+    ]
 )
-def update_figure(selected_year):
-    filtered_df = df[df['year'] == selected_year]
-    traces = []
-    for continent_name in filtered_df['continent'].unique():
-        df_by_continent = filtered_df[filtered_df['continent'] == continent_name]
-        traces.append(go.Scatter(
-            x=df_by_continent['gdpPercap'],
-            y=df_by_continent['lifeExp'],
-            text=df_by_continent['country'],
-            mode='markers',
-            opacity=0.7,
-            marker={'size': 15},
-            name=continent_name
-        ))
+def update_graph(xaxis_name, yaxis_name):
     return {
-        'data': traces,
+        'data': [go.Scatter(
+            x=df[xaxis_name],
+            y=df[yaxis_name],
+            text=df['name'],
+            mode='markers',
+            marker={
+                'size': 15,
+                'opacity': 0.5,
+                'line': {
+                    'width': 0.5,
+                    'color': 'white'}
+            }
+        )],
         'layout': go.Layout(
             xaxis={
-                'type': 'log',
-                'title': 'GDP Per Capita'
+                'title': xaxis_name.title()
             },
             yaxis={
-                'title': 'Life Expectancy'
+                'title': yaxis_name.title()
+            },
+            margin={
+                'l': 40,
+                'b': 40,
+                't': 10,
+                'r': 0
             },
             hovermode='closest'
         )
