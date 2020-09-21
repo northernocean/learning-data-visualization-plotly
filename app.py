@@ -1,101 +1,89 @@
-import os
-import base64
+#######
+# Here we'll make a scatter plot with fake data that is
+# intentionally denser on the left, with overlapping data points.
+# We'll use Selection Data to uncover the difference.
+######
 import dash
 import dash_core_components as core
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
+import numpy as np
 import pandas as pd
-import json
 
 app = dash.Dash()
 
-df = pd.read_csv('data/wheels.csv')
+# create x and y arrays
+np.random.seed(10)
+x1 = np.linspace(0.1, 5, 50)        # left half
+x2 = np.linspace(5.1, 10, 50)       # right half
+y = np.random.randint(0, 50, 50)    # 50 random points
 
+# create three "half DataFrames"
+df1 = pd.DataFrame({'x': x1, 'y': y})
+df2 = pd.DataFrame({'x': x1, 'y': y})
+df3 = pd.DataFrame({'x': x2, 'y': y})
 
-def encode_image(file_path):
-    encoded = base64.b64encode(open(file_path, "rb").read())
-    return f"data:image/png;base64,{encoded.decode()}"
-
+# combine them into one DataFrame (df1 and df2 points overlap!)
+df = pd.concat([df1, df2, df3])
 
 app.layout = html.Div(
-    children=[
+    [
         html.Div(
-            className="dash-app",
-            children=[
+            [
                 core.Graph(
-                    id='wheels-plot',
+                    id='plot',
                     figure={
                         'data': [
                             go.Scatter(
-                                x=df['color'],
-                                y=df['wheels'],
-                                dy=1,
-                                mode='markers',
-                                marker={
-                                    'size': 12,
-                                    'color': 'rgb(51,204,153)',
-                                    'line': {'width': 2}
-                                }
+                                x=df['x'],
+                                y=df['y'],
+                                mode='markers'
                             )
                         ],
                         'layout': go.Layout(
-                            title='Wheels & Colors Scatterplot',
-                            xaxis={
-                                'title': 'Color'
-                            },
-                            yaxis={
-                                'title': '# of Wheels',
-                                'nticks': 3
-                            },
+                            title='Random Scatterplot',
                             hovermode='closest'
                         )
                     }
                 )
-            ]
+            ],
+            style={'width': '30%', 'display': 'inline-block'}
         ),
         html.Div(
-            className="dash-app",
-            children=[
-                html.Pre(
-                    id='hover-data'
+            [
+                html.H1(
+                    id='density',
+                    style={'paddingTop': 25}
                 )
-            ]
+            ],
+            style={
+                'width': '30%',
+                'display': 'inline-block',
+                'verticalAlign': 'top'
+            }
         )
-        # ,html.Div(
-        #     [
-        #         html.Img(
-        #             id='hover-image',
-        #             src='children',
-        #             height=300
-        #         )
-        #     ]
-        # )
     ]
 )
 
 
-# output hover data on page
 @app.callback(
-    Output('hover-data', 'children'),
-    [Input('wheels-plot', 'selectedData')]
+    Output('density', 'children'),
+    [Input('plot', 'selectedData')]
 )
-def callback_json(selectedData):
-    return json.dumps(selectedData, indent=2)
-
-
-# output image on page
-# @app.callback(
-#     Output('hover-image', 'src'),
-#     [Input('wheels-plot', 'selectedData')]
-# )
-# def callback_image(selectedData):
-#     wheel = selectedData['points'][0]['y']
-#     color = selectedData['points'][0]['x']
-#     path = df[(df["wheels"] == wheel) & (df["color"] == color)].iloc[0]["image"]
-#     path = os.path.join("data", "images", path)
-#     return encode_image(path)
+def find_density(selectedData):
+    pts = len(selectedData['points'])
+    rng_or_lp = list(selectedData.keys())  # boxed range or lassoed points
+    rng_or_lp.remove('points')
+    max_x = max(selectedData[rng_or_lp[0]]['x'])
+    min_x = min(selectedData[rng_or_lp[0]]['x'])
+    max_y = max(selectedData[rng_or_lp[0]]['y'])
+    min_y = min(selectedData[rng_or_lp[0]]['y'])
+    area = (max_x - min_x) * (max_y - min_y)
+    d = pts / area
+    return 'Density = {:.2f}'.format(d)
 
 
 if __name__ == '__main__':
     app.run_server()
+
